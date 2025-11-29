@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { login } from '$lib/api';
+	import Header from '$lib/components/Header.svelte';
 
 	let phone = $state('');
 	let password = $state('');
@@ -32,53 +33,55 @@
 	}
 </script>
 
+<Header title="用户登录" />
+
 <section
-	class="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-950 via-cyan-950 to-indigo-950 flex items-center justify-center px-6"
+	class="min-h-[calc(100vh-64px)] relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center px-6 transition-colors duration-300"
 >
 	<!-- 背景动画 -->
-	<div class="absolute inset-0 pointer-events-none">
+	<div class="absolute inset-0 pointer-events-none overflow-hidden">
 		<div
-			class="absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full bg-cyan-600/10 blur-3xl animate-pulse"
+			class="absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full bg-cyan-400/20 dark:bg-cyan-600/10 blur-3xl animate-pulse"
 		></div>
 		<div
-			class="absolute bottom-[-10%] right-[-10%] h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl animate-[pulse_7s_ease-in-out_infinite]"
+			class="absolute bottom-[-10%] right-[-10%] h-96 w-96 rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-3xl animate-[pulse_7s_ease-in-out_infinite]"
 		></div>
 	</div>
 
 	<div
-		class="relative z-10 max-w-md w-full bg-slate-900/60 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-8 shadow-2xl"
+		class="relative z-10 max-w-md w-full bg-white/60 dark:bg-slate-900/60 border border-white/20 dark:border-cyan-500/20 backdrop-blur-xl rounded-3xl p-8 shadow-2xl"
 	>
 		<div class="text-center mb-8">
 			<h1
-				class="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400"
+				class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400"
 			>
 				欢迎回来
 			</h1>
-			<p class="text-slate-400 mt-2 text-sm">登录您的账号以继续打卡</p>
+			<p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">登录您的账号以继续打卡</p>
 		</div>
 
 		<form onsubmit={handleLogin} class="space-y-6">
 			<div>
-				<label for="phone" class="block text-sm font-medium text-slate-300 mb-2">手机号</label>
+				<label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">手机号</label>
 				<input
 					type="tel"
 					id="phone"
 					required
 					bind:value={phone}
 					placeholder="请输入手机号"
-					class="w-full rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none px-4 py-3 transition"
+					class="w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none px-4 py-3 transition"
 				/>
 			</div>
 
 			<div>
-				<label for="password" class="block text-sm font-medium text-slate-300 mb-2">密码</label>
+				<label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">密码</label>
 				<input
 					type="password"
 					id="password"
 					required
 					bind:value={password}
 					placeholder="请输入密码"
-					class="w-full rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none px-4 py-3 transition"
+					class="w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none px-4 py-3 transition"
 				/>
 			</div>
 
@@ -91,7 +94,7 @@
 			<button
 				type="submit"
 				disabled={loading}
-				class="w-full relative group overflow-hidden rounded-xl bg-linear-to-r from-cyan-600 to-indigo-600 p-px focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 p-[1px] focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				<div
 					class="relative rounded-xl bg-slate-900/0 group-hover:bg-white/5 transition-colors px-6 py-3.5"
@@ -124,8 +127,8 @@
 		</form>
 
 		<div class="mt-6 text-center">
-			<p class="text-slate-500 text-sm">
-				还没有账号？ <a href="#contact" class="text-cyan-400 hover:text-cyan-300 transition">联系管理员</a>
+			<p class="text-slate-500 dark:text-slate-500 text-sm">
+				还没有账号？ <a href="#" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 dark:hover:text-cyan-300 transition">联系管理员</a>
 			</p>
 		</div>
 	</div>

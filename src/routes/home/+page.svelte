@@ -24,7 +24,7 @@
 			user = JSON.parse(userData);
 		} else {
 			// window.location.href = '/login';
-			return;
+			// return;
 		}
 
 		// 2. 加载 Mock 数据 (模拟 API 调用)
@@ -40,6 +40,7 @@
 			map[dateStr] = record;
 		});
 		timeSheetMap = map;
+		console.log(timeSheetMap)
 		currentMonthStr = MOCK_TIMESHEET_DATA.month;
 	}
 
