@@ -58,7 +58,7 @@
 			</div>
 			
 			<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white drop-shadow-lg">
-				TS <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500">打卡助手</span>
+				TS <span class="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-blue-500 to-indigo-500">打卡助手</span>
 			</h1>
 			
 			<p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
@@ -72,7 +72,7 @@
 					class="group relative px-10 py-4 bg-slate-100 text-slate-950 rounded-full font-bold text-lg shadow-[0_0_25px_-5px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_-5px_rgba(34,211,238,0.4)] hover:scale-105 transition-all duration-300 overflow-hidden"
 				>
 					<div
-						class="absolute inset-0 bg-gradient-to-r from-cyan-200 to-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+						class="absolute inset-0 bg-linear-to-r from-cyan-200 to-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
 					></div>
 					<span class="relative z-10 flex items-center gap-3">
 						立即开启

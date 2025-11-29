@@ -1,0 +1,329 @@
+{
+  "timesheet": [
+    {
+      "status": "Empty",
+      "lockflag": "0",
+      "each_day": "20251027",
+      "enable": "N",
+      "day": "27",
+      "proj": "",
+      "allowance": ""
+    },
+    {
+      "status": "Empty",
+      "lockflag": "0",
+      "each_day": "20251028",
+      "enable": "N",
+      "day": "28",
+      "proj": "",
+      "allowance": ""
+    },
+    {
+      "status": "Empty",
+      "lockflag": "0",
+      "each_day": "20251029",
+      "enable": "N",
+      "day": "29",
+      "proj": "",
+      "allowance": ""
+    },
+    {
+      "status": "Empty",
+      "lockflag": "0",
+      "each_day": "20251030",
+      "enable": "N",
+      "day": "30",
+      "proj": "",
+      "allowance": ""
+    },
+    {
+      "status": "Empty",
+      "lockflag": "0",
+      "each_day": "20251031",
+      "enable": "N",
+      "day": "31",
+      "proj": "",
+      "allowance": ""
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251101",
+      "enable": "Y",
+      "day": "01",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251102",
+      "enable": "Y",
+      "day": "02",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251103",
+      "enable": "Y",
+      "day": "03",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251104",
+      "enable": "Y",
+      "day": "04",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251105",
+      "enable": "Y",
+      "day": "05",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251106",
+      "enable": "Y",
+      "day": "06",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251107",
+      "enable": "Y",
+      "day": "07",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251108",
+      "enable": "Y",
+      "day": "08",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251109",
+      "enable": "Y",
+      "day": "09",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251110",
+      "enable": "Y",
+      "day": "10",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251111",
+      "enable": "Y",
+      "day": "11",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251112",
+      "enable": "Y",
+      "day": "12",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251113",
+      "enable": "Y",
+      "day": "13",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251114",
+      "enable": "Y",
+      "day": "14",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251115",
+      "enable": "Y",
+      "day": "15",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251116",
+      "enable": "Y",
+      "day": "16",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251117",
+      "enable": "Y",
+      "day": "17",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251118",
+      "enable": "Y",
+      "day": "18",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251119",
+      "enable": "Y",
+      "day": "19",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251120",
+      "enable": "Y",
+      "day": "20",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251121",
+      "enable": "Y",
+      "day": "21",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251122",
+      "enable": "Y",
+      "day": "22",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251123",
+      "enable": "Y",
+      "day": "23",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251124",
+      "enable": "Y",
+      "day": "24",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "0",
+      "each_day": "20251125",
+      "enable": "Y",
+      "day": "25",
+      "proj": "个人休假-带薪",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251126",
+      "enable": "Y",
+      "day": "26",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251127",
+      "enable": "Y",
+      "day": "27",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Draft",
+      "lockflag": "0",
+      "each_day": "20251128",
+      "enable": "Y",
+      "day": "28",
+      "proj": "上海电氢智运机",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251129",
+      "enable": "Y",
+      "day": "29",
+      "proj": "法定假日",
+      "allowance": "0"
+    },
+    {
+      "status": "Approved",
+      "lockflag": "1",
+      "each_day": "20251130",
+      "enable": "N",
+      "day": "30",
+      "proj": "法定假日",
+      "allowance": "0"
+    }
+  ],
+  "month": "202511",
+  "allowance_query": "N",
+  "status": "S",
+  "message": "",
+  "allowance_type": "0",
+  "allowance_type_name": "贴票报销",
+  "company_status": "Y",
+  "button_status": "N",
+  "update_status": "N",
+  "con_status": "S"
+}

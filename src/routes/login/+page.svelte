@@ -33,7 +33,7 @@
 </script>
 
 <section
-	class="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-cyan-950 to-indigo-950 flex items-center justify-center px-6"
+	class="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-950 via-cyan-950 to-indigo-950 flex items-center justify-center px-6"
 >
 	<!-- 背景动画 -->
 	<div class="absolute inset-0 pointer-events-none">
@@ -50,7 +50,7 @@
 	>
 		<div class="text-center mb-8">
 			<h1
-				class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+				class="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400"
 			>
 				欢迎回来
 			</h1>
@@ -91,7 +91,7 @@
 			<button
 				type="submit"
 				disabled={loading}
-				class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 p-[1px] focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="w-full relative group overflow-hidden rounded-xl bg-linear-to-r from-cyan-600 to-indigo-600 p-px focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				<div
 					class="relative rounded-xl bg-slate-900/0 group-hover:bg-white/5 transition-colors px-6 py-3.5"
@@ -125,7 +125,7 @@
 
 		<div class="mt-6 text-center">
 			<p class="text-slate-500 text-sm">
-				还没有账号？ <a href="#" class="text-cyan-400 hover:text-cyan-300 transition">联系管理员</a>
+				还没有账号？ <a href="#contact" class="text-cyan-400 hover:text-cyan-300 transition">联系管理员</a>
 			</p>
 		</div>
 	</div>
