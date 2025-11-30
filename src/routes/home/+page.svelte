@@ -1,15 +1,28 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import Calendar from '$lib/components/Calendar.svelte';
 	import CheckInForm from '$lib/components/CheckInForm.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import type { CheckInRecord, TimeSheetRecord } from '$lib/data';
 	import { MOCK_TIMESHEET_DATA } from '$lib/mock';
+	import Header from '$lib/components/Header.svelte';
 
 	let user = $state<{ name: string } | null>(null);
 	// let records = $state<Record<string, CheckInRecord>>({}); // 旧逻辑，暂时保留或整合
 	let timeSheetMap = $state<Record<string, TimeSheetRecord>>({}); // 新逻辑，存储后端返回的 TimeSheet
 	let currentMonthStr = $state('202511'); // 默认月份，实际应根据日期或接口返回动态设置
 	
+	// Location State
+	let savedLocations = $state<any[]>([]);
+	let currentSimLocationId = $state('');
+
+	// Modal State
+	let isModalOpen = $state(false);
+	let modalMessage = $state('');
+	let modalTitle = $state('提示');
+
 	// 初始化选中日期为 2025-11-19 (根据用户上下文) 或 当天
 	// 为了演示 mock 数据效果，默认选中 2025-11-19
 	let selectedDate = $state('2025-11-19'); 
@@ -29,6 +42,18 @@
 
 		// 2. 加载 Mock 数据 (模拟 API 调用)
 		loadMockData();
+
+		// 3. 加载已存地点
+		const locs = localStorage.getItem('locations');
+		if (locs) {
+			try {
+				savedLocations = JSON.parse(locs);
+				const def = savedLocations.find(l => l.isDefault);
+				if (def) currentSimLocationId = def.id;
+			} catch (e) {
+				console.error(e);
+			}
+		}
 	});
 
 	function loadMockData() {
@@ -97,7 +122,9 @@
 			};
 		}
 
-		alert('打卡提交成功 (Mock)！');
+		modalTitle = '成功';
+		modalMessage = '打卡提交成功 (Mock)！';
+		isModalOpen = true;
 		
 		// 移动端保存后返回日历
 		if (window.innerWidth < 768) {
@@ -110,36 +137,29 @@
 	}
 </script>
 
-<div class="min-h-screen bg-slate-950 text-slate-200 flex flex-col">
-	<!-- 顶部导航栏 -->
-	<header class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-50">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-			<div class="flex items-center gap-3">
-				<!-- 移动端表单视图下的返回按钮 -->
-				<button 
-					class="md:hidden p-1 -ml-1 rounded-lg text-slate-400 hover:text-white {mobileView === 'calendar' ? 'hidden' : ''}"
-					onclick={handleBackToCalendar}
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-				</button>
-				
-				<h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400 truncate">
-					{mobileView === 'form' ? '填写打卡' : '打卡助手'}
-				</h1>
-			</div>
+{#snippet headerExtra()}
+	<button 
+		onclick={() => goto('/map')}
+		class="p-2 rounded-lg text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+		title="地图选点"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+	</button>
+{/snippet}
 
-			<div class="flex items-center gap-4">
-				<span class="hidden sm:block text-sm text-slate-400">欢迎, {user?.name || '...'}</span>
-				<button
-					onclick={logout}
-					class="text-sm px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
-				>
-					退出
-				</button>
-			</div>
-		</div>
-	</header>
+<!-- Header 悬浮 -->
+<div class="absolute top-0 left-0 w-full z-50">
+	<Header 
+		title={mobileView === 'form' ? '填写打卡' : '打卡助手'}
+		user={user}
+		showBack={mobileView === 'form'}
+		onBack={handleBackToCalendar}
+		onLogout={logout}
+		extra={headerExtra}
+	/>
+</div>
 
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 flex flex-col pt-16 transition-colors duration-300">
 	<main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
 		<div class="flex flex-col md:flex-row gap-6 h-full">
 			
@@ -153,29 +173,48 @@
 				/>
 				
 				<!-- 移动端日历下方的提示 -->
-				<div class="md:hidden mt-6 text-center text-slate-500 text-sm">
+				<div class="md:hidden mt-6 text-center text-slate-500 dark:text-slate-400 text-sm">
 					点击日期进行打卡或查看详情
 				</div>
 
 				<!-- 图例 -->
-				<div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+				<div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
 					<div class="flex items-center gap-1.5">
-						<span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Approved
+						<span class="w-2.5 h-2.5 rounded-full bg-red-500 dark:bg-red-400"></span> Approved
 					</div>
 					<div class="flex items-center gap-1.5">
-						<span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Draft
+						<span class="w-2.5 h-2.5 rounded-full bg-blue-500 dark:bg-blue-400"></span> Draft
 					</div>
 					<div class="flex items-center gap-1.5">
-						<span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Rejected
+						<span class="w-2.5 h-2.5 rounded-full bg-purple-500 dark:bg-purple-400"></span> Rejected
 					</div>
 					<div class="flex items-center gap-1.5">
-						<span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> Empty
+						<span class="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-500"></span> Empty
 					</div>
 				</div>
 			</div>
 
 			<!-- 右侧：表单视图 -->
-			<div class="w-full md:w-1/2 lg:w-7/12 {mobileView === 'calendar' ? 'hidden md:block' : 'block'}">
+			<div class="w-full md:w-1/2 lg:w-7/12 {mobileView === 'calendar' ? 'hidden md:block' : 'block'} space-y-6">
+				<!-- 模拟定位卡片 -->
+				<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-lg transition-colors duration-300">
+					<h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-600 dark:text-cyan-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+						模拟定位
+					</h2>
+					{#if savedLocations.length === 0}
+						<p class="text-slate-500 dark:text-slate-400 text-sm py-2 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+							没有添加地点，将使用默认位置
+						</p>
+					{:else}
+						<Select
+							bind:value={currentSimLocationId}
+							options={savedLocations.map(l => ({ value: l.id, label: l.name }))}
+							placeholder="请选择模拟位置"
+						/>
+					{/if}
+				</div>
+
 				<CheckInForm 
 					date={selectedDate}
 					initialData={mapToFormRecord(selectedDate, timeSheetMap[selectedDate])}
@@ -185,3 +224,20 @@
 		</div>
 	</main>
 </div>
+
+<Modal 
+	isOpen={isModalOpen} 
+	title={modalTitle}
+	onClose={() => isModalOpen = false}
+>
+	<p class="text-slate-600 dark:text-slate-300">{modalMessage}</p>
+	
+	{#snippet footer()}
+		<button 
+			class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors font-medium shadow-sm shadow-cyan-500/20"
+			onclick={() => isModalOpen = false}
+		>
+			确定
+		</button>
+	{/snippet}
+</Modal>
