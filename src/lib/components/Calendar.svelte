@@ -173,7 +173,7 @@
 					<!-- 下方信息 -->
 					<div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[140%] flex flex-col items-center gap-0.5 pointer-events-none z-20">
 						{#if projName}
-							<span class="text-[10px] leading-tight text-center line-clamp-2 text-slate-500 dark:text-slate-400 w-full px-0.5 break-all scale-90 origin-top">
+							<span class="text-[10px] leading-tight text-center truncate text-slate-500 dark:text-slate-400 w-full px-0.5 scale-90 origin-top">
 								{projName}
 							</span>
 						{/if}
