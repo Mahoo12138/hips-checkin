@@ -33,10 +33,13 @@
 	}
 </script>
 
-<Header title="用户登录" />
+<!-- Header 悬浮 -->
+<div class="absolute top-0 left-0 w-full z-50">
+	<Header title="用户登录" />
+</div>
 
 <section
-	class="min-h-[calc(100vh-64px)] relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center px-6 transition-colors duration-300"
+	class="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center px-6 pt-16 transition-colors duration-300"
 >
 	<!-- 背景动画 -->
 	<div class="absolute inset-0 pointer-events-none overflow-hidden">

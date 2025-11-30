@@ -141,7 +141,9 @@
 	<div class="grid grid-cols-7 gap-x-1 gap-y-6 pb-4">
 		{#each calendarDays as day}
 			{#if day === null}
-				<div class="aspect-square"></div>
+				<div class="flex flex-col items-center pointer-events-none" aria-hidden="true">
+					<div class="w-8 h-8 md:w-9 md:h-9"></div>
+				</div>
 			{:else}
 				{@const dateStr = formatDate(day)}
 				{@const record = timeSheetData[dateStr]}
@@ -175,10 +177,6 @@
 								{projName}
 							</span>
 						{/if}
-						
-						<span class="text-[10px] font-bold scale-75 origin-top {getStatusColor(status)}">
-							{status === 'Empty' ? '' : status}
-						</span>
 					</div>
 				</button>
 			{/if}

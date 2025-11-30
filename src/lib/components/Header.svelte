@@ -7,12 +7,13 @@
 		showBack?: boolean;
 		onBack?: () => void;
 		onLogout?: () => void;
+		extra?: import('svelte').Snippet;
 	}
 
-	let { title = '打卡助手', user = null, showBack = false, onBack, onLogout } = $props<Props>();
+	let { title = '打卡助手', user = null, showBack = false, onBack, onLogout, extra }: Props = $props();
 </script>
 
-<header class="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 transition-colors duration-300">
+<header class="sticky top-0 z-50 w-full border-b bg-transparent border-slate-200 dark:border-slate-800 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			{#if showBack && onBack}
@@ -30,6 +31,10 @@
 		</div>
 
 		<div class="flex items-center gap-2 sm:gap-4">
+			{#if extra}
+				{@render extra()}
+			{/if}
+
 			<ThemeToggle />
 			
 			{#if user}
