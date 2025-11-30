@@ -3,6 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { goto } from '$app/navigation';
+	import { toastStore } from '$lib/components/toast';
 
 	interface LocationItem {
 		id: string;
@@ -45,7 +46,7 @@
 			initMap();
 		} catch (e) {
 			console.error('Failed to load AMap', e);
-			alert('地图加载失败，请检查网络或 Key 配置');
+			toastStore.error('地图加载失败，请检查网络或 Key 配置');
 		}
 	});
 
@@ -209,6 +210,17 @@
 	function addLocation() {
 		if (!selectedLocation) return;
 		
+		// Check for duplicates (simple check by name or coordinates)
+		const isDuplicate = savedLocations.some(l => 
+			l.name === selectedLocation?.name || 
+			(Math.abs(l.lng - selectedLocation!.lng) < 0.0001 && Math.abs(l.lat - selectedLocation!.lat) < 0.0001)
+		);
+
+		if (isDuplicate) {
+			toastStore.warning('该地点已在列表中');
+			return;
+		}
+
 		const newLoc: LocationItem = {
 			id: Date.now().toString(),
 			name: selectedLocation.name,
@@ -220,7 +232,7 @@
 
 		savedLocations = [...savedLocations, newLoc];
 		saveLocationsToStorage();
-		alert('地点已添加');
+		toastStore.success('地点已添加');
 	}
 
 	function deleteLocation(id: string) {
@@ -256,7 +268,7 @@
 			savedLocations = data;
 			saveLocationsToStorage();
 			isIOModalOpen = false;
-			alert('导入成功');
+			toastStore.success('导入成功');
 		} catch (e: any) {
 			ioError = '导入失败: ' + e.message;
 		}
@@ -274,6 +286,24 @@
 		showBack={true}
 		onBack={handleBack}
 	/>
+	<!-- Force back button visibility on desktop if needed, but Header component handles md:hidden. 
+	     We need to override or modify Header. simpler to add a custom back button in extra slot or modify Header style.
+	     Let's check Header again. It has `md:hidden`.
+	     The user requested to fix "Map page has no back button on wide screen".
+	     I will pass a custom extra slot to Header or just add a fixed back button here? 
+	     Better: modify Header to accept a prop to force back button visibility or just render a custom one.
+	     Actually, I'll just add a custom back button in the extra slot for desktop, or modify Header.
+	     Let's look at Header usage. It takes `showBack` which toggles a button with `md:hidden`.
+	     I can change Header to not use `md:hidden` if I pass a specific prop, or just hack it here by adding a button in `extra`.
+	     But `extra` is on the right side.
+	     
+	     Let's modify Header.svelte first to allow forcing back button visibility.
+	     Wait, I can't modify Header inside this tool call easily without context switch.
+	     
+	     Alternative: Add a floating back button on top left for desktop? No, inconsistent.
+	     
+	     Let's go with modifying Header.svelte in next step. For now, finish this file.
+	-->
 </div>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-950 pt-16 flex flex-col h-screen">
@@ -404,7 +434,7 @@
 			<button
 				onclick={() => {
 					navigator.clipboard.writeText(ioJsonContent);
-					alert('已复制到剪贴板');
+					toastStore.info('已复制到剪贴板');
 				}}
 				class="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
 			>
