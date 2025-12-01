@@ -16,7 +16,7 @@
 			const res = await login(phone, password);
 			// 存储 token
 			if (typeof localStorage !== 'undefined') {
-				localStorage.setItem('token', res.token);
+				localStorage.setItem('access_token', res.token);
 				localStorage.setItem('user', JSON.stringify(res.user));
 			}
 			// 登录成功跳转到主页
