@@ -4,7 +4,7 @@ import CryptoJS from 'crypto-js';
 const PUBLIC_KEY = 'MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJL0JkqsUoK6kt3JyogsgqNp9VDGDp+t3ZAGMbVoMPdHNT2nfiIVh9ZMNHF7g2XiAa8O8AQWyh2PjMR0NiUSVQMCAwEAAQ==';
 
 export function encryptPassword(password: string): string {
-	const encryptor = new JSEncrypt();
+	const encryptor = new JSEncrypt({});
 	encryptor.setPublicKey(PUBLIC_KEY);
 	// Java uses RSA/ECB/PKCS1Padding, which matches JSEncrypt default
 	const encrypted = encryptor.encrypt(password);
