@@ -1,4 +1,4 @@
-module myproject
+module hips-checkin
 
 go 1.23
 

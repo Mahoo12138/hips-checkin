@@ -65,7 +65,9 @@
 
 		<form onsubmit={handleLogin} class="space-y-6">
 			<div>
-				<label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">手机号</label>
+				<label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+					>手机号</label
+				>
 				<input
 					type="tel"
 					id="phone"
@@ -77,7 +79,10 @@
 			</div>
 
 			<div>
-				<label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">密码</label>
+				<label
+					for="password"
+					class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">密码</label
+				>
 				<input
 					type="password"
 					id="password"
