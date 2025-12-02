@@ -71,3 +71,23 @@ export async function login(phone: string, password: string): Promise<LoginRespo
 		throw e;
 	}
 }
+
+/**
+ * 退出登录
+ */
+export async function logout(): Promise<void> {
+	if (typeof localStorage === 'undefined') return;
+
+	const token = localStorage.getItem('access_token');
+	const deviceId = getDeviceID();
+
+	if (!token) return;
+
+	try {
+		await api.get(`/hipspfm/hippius/v1/users/logout/${token}`, {
+			params: { deviceId }
+		});
+	} catch (e) {
+		console.warn('Logout API call failed, clearing local state anyway:', e);
+	}
+}

@@ -50,6 +50,22 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 				}
 			}
 			const errorText = await response.text();
+			
+			// Try parsing JSON error message
+			let customErrorMsg = null;
+			try {
+				const errorJson = JSON.parse(errorText);
+				if (errorJson && errorJson.message) {
+					customErrorMsg = errorJson.message;
+				}
+			} catch (e) {
+				// ignore parse error
+			}
+
+			if (customErrorMsg) {
+				throw new Error(customErrorMsg);
+			}
+
 			throw new Error(`Request failed: ${response.status} ${errorText}`);
 		}
 

@@ -8,6 +8,7 @@
 	import type { CheckInRecord, TimeSheetRecord } from '$lib/data';
 	import { MOCK_TIMESHEET_DATA } from '$lib/mock';
 	import Header from '$lib/components/Header.svelte';
+	import { logout as apiLogout } from '$lib/api';
 
 	let user = $state<{ name: string } | null>(null);
 	// let records = $state<Record<string, CheckInRecord>>({}); // 旧逻辑，暂时保留或整合
@@ -69,7 +70,8 @@
 		currentMonthStr = MOCK_TIMESHEET_DATA.month;
 	}
 
-	function logout() {
+	async function logout() {
+		await apiLogout();
 		localStorage.removeItem('access_token');
 		localStorage.removeItem('user');
 		window.location.href = '/login';
