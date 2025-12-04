@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import Header from '$lib/components/Header.svelte';
 
 	let skipNext = $state(false);
@@ -8,7 +9,7 @@
 	onMount(() => {
 		const flag = typeof localStorage !== 'undefined' ? localStorage.getItem('skipWelcome') : null;
 		if (flag === '1' && !isTest) {
-			window.location.assign('/login');
+			goto('/login');
 		}
 	});
 
@@ -16,7 +17,7 @@
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem('skipWelcome', skipNext ? '1' : '0');
 		}
-		window.location.assign('/login');
+		goto('/login');
 	}
 </script>
 

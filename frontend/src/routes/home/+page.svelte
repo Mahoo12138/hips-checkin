@@ -72,9 +72,9 @@
 
 	async function logout() {
 		await apiLogout();
-		localStorage.removeItem('access_token');
+		// localStorage.removeItem('access_token'); // Handled in apiLogout -> DeleteToken
 		localStorage.removeItem('user');
-		window.location.href = '/login';
+		goto('/login');
 	}
 
 	function handleDateSelect(date: string, record: TimeSheetRecord | null) {

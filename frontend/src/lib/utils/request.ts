@@ -1,4 +1,6 @@
 import { toastStore } from '$lib/components/toast';
+import { GetToken } from '$lib/../../wailsjs/go/main/App';
+import { goto } from '$app/navigation';
 
 const BASE_URL = 'https://hippiusgw.hand-china.com';
 
@@ -20,9 +22,20 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
 	// Add Authorization
 	if (!skipAuth) {
-		const token = typeof localStorage !== 'undefined' ? localStorage.getItem('access_token') : null;
-		if (token) {
-			headers.set('Authorization', `bearer ${token}`);
+		try {
+			// Check environment
+			let token = '';
+			if (typeof window !== 'undefined' && (window as any).go) {
+				token = await GetToken();
+			} else if (typeof localStorage !== 'undefined') {
+				token = localStorage.getItem('access_token') || '';
+			}
+			
+			if (token) {
+				headers.set('Authorization', `bearer ${token}`);
+			}
+		} catch (e) {
+			console.warn('Failed to retrieve token:', e);
 		}
 	}
 
@@ -46,7 +59,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 				// Handle unauthorized
 				if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
 					toastStore.error('登录已过期，请重新登录');
-					window.location.href = '/login';
+					goto('/login');
 				}
 			}
 			const errorText = await response.text();

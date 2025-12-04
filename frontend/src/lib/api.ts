@@ -1,5 +1,31 @@
 import { api } from './utils/request';
 import { encryptPassword, getDeviceID } from './utils/crypto';
+import { SaveToken, GetToken, DeleteToken } from '$lib/../../wailsjs/go/main/App';
+
+// Safe wrappers for Wails calls to support browser dev
+const safeSaveToken = async (token: string) => {
+	if (typeof window !== 'undefined' && (window as any).go) {
+		return await SaveToken(token);
+	}
+	console.warn('Wails runtime not available, falling back to localStorage');
+	localStorage.setItem('access_token', token);
+};
+
+const safeGetToken = async () => {
+	if (typeof window !== 'undefined' && (window as any).go) {
+		return await GetToken();
+	}
+	console.warn('Wails runtime not available, reading from localStorage');
+	return localStorage.getItem('access_token') || '';
+};
+
+const safeDeleteToken = async () => {
+	if (typeof window !== 'undefined' && (window as any).go) {
+		return await DeleteToken();
+	}
+	console.warn('Wails runtime not available, clearing localStorage');
+	localStorage.removeItem('access_token');
+};
 
 export interface LoginResponse {
 	token: string;
@@ -16,6 +42,7 @@ interface OAuthTokenResponse {
 	refresh_token: string;
 	expires_in: number;
 	scope: string;
+	// ...
 }
 
 /**
@@ -53,6 +80,9 @@ export async function login(phone: string, password: string): Promise<LoginRespo
 			skipAuth: true
 		});
 
+		// Securely save token
+		await safeSaveToken(res.access_token);
+
 		// 登录成功，返回统一格式
 		// 由于 OAuth 接口通常只返回 Token，这里 Mock 用户信息
 		// 实际场景可能需要调用 /api/user/me 获取用户信息
@@ -76,9 +106,9 @@ export async function login(phone: string, password: string): Promise<LoginRespo
  * 退出登录
  */
 export async function logout(): Promise<void> {
-	if (typeof localStorage === 'undefined') return;
+	// if (typeof localStorage === 'undefined') return;
 
-	const token = localStorage.getItem('access_token');
+	const token = await safeGetToken();
 	const deviceId = getDeviceID();
 
 	if (!token) return;
@@ -89,5 +119,7 @@ export async function logout(): Promise<void> {
 		});
 	} catch (e) {
 		console.warn('Logout API call failed, clearing local state anyway:', e);
+	} finally {
+		await safeDeleteToken();
 	}
 }

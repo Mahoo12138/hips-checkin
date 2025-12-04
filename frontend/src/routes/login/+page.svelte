@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { login } from '$lib/api';
+	import { goto } from '$app/navigation';
+
 	import Header from '$lib/components/Header.svelte';
 
 	let phone = $state('');
@@ -15,12 +17,11 @@
 		try {
 			const res = await login(phone, password);
 			// 存储 token
-			if (typeof localStorage !== 'undefined') {
-				localStorage.setItem('access_token', res.token);
-				localStorage.setItem('user', JSON.stringify(res.user));
-			}
+			// localStorage.setItem('access_token', res.token); // Removed
+			localStorage.setItem('user', JSON.stringify(res.user)); // User info can stay in LS or move too
+			
 			// 登录成功跳转到主页
-			window.location.href = '/home';
+			goto('/home');
 		} catch (err) {
 			if (err instanceof Error) {
 				error = err.message;

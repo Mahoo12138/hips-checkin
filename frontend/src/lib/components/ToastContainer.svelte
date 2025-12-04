@@ -11,7 +11,7 @@
 	});
 </script>
 
-<div class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+<div class="fixed top-4 right-4 z-100 flex flex-col gap-2 pointer-events-none">
 	{#each toasts as t (t.id)}
 		<div
 			animate:flip={{ duration: 300 }}
@@ -46,7 +46,7 @@
 				onclick={() => toastStore.remove(t.id)}
 				class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Close"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
 			</button>
 		</div>
 	{/each}

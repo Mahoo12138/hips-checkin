@@ -8,6 +8,20 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	interface Window {
+		go: any;
+		runtime: any;
+	}
+
+	interface ImportMeta {
+		env: Record<string, string>;
+	}
+}
+
+declare module '$lib/assets/favicon.svg' {
+	const content: string;
+	export default content;
 }
 
 export {};
