@@ -40,11 +40,16 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 	}
 
 	// Default headers if not multipart (fetch handles multipart boundary automatically if body is FormData)
-	// if (!(init.body instanceof FormData)) {
-	// 	if (!headers.has('Content-Type')) {
-	// 		headers.set('Content-Type', 'application/json');
-	// 	}
-	// }
+	if (init.body && typeof init.body === 'object' && 
+		!(init.body instanceof FormData) && 
+		!(init.body instanceof URLSearchParams) &&
+		!(init.body instanceof Blob)) {
+		
+		if (!headers.has('Content-Type')) {
+			headers.set('Content-Type', 'application/json');
+		}
+		init.body = JSON.stringify(init.body);
+	}
 
 	const config: RequestInit = {
 		...init,

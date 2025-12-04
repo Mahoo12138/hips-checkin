@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { TimeSheetRecord } from '$lib/data';
+	import type { TimeSheetRecord } from '$lib/types';
 
 	interface Props {
 		selectedDate: string;

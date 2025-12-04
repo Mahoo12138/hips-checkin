@@ -1,45 +1,97 @@
 <script lang="ts">
-	import { PROJECTS, OFFICES, type CheckInRecord } from '$lib/data';
+	import type { CheckInRecord, DefaultProjectResponse } from '$lib/types';
 	import Select from './Select.svelte';
 
 	interface Props {
+		record?: CheckInRecord | null;
 		date: string;
-		initialData?: CheckInRecord | null;
-		onSave: (data: Omit<CheckInRecord, 'id' | 'submittedAt'>) => void;
+		defaultProject?: DefaultProjectResponse | null;
+		onSubmit: (data: Omit<CheckInRecord, 'id' | 'submittedAt'>) => void;
+		onBack?: () => void;
 	}
 
-	let { date, initialData, onSave }: Props = $props();
+	let { record = null, date, defaultProject = null, onSubmit, onBack }: Props = $props();
 
+	// Form state
 	let projectId = $state('');
-	let location = $state('中国大陆');
+	let location = $state('');
 	let office = $state('');
 	let hasFlyback = $state(false);
 	let description = $state('');
-
-	// 当日期或初始数据变化时更新表单
+	
+	// 监听 record 或 defaultProject 变化，更新表单
 	$effect(() => {
-		if (initialData) {
-			projectId = initialData.projectId;
-			location = initialData.location;
-			office = initialData.office;
-			hasFlyback = initialData.hasFlyback;
-			description = initialData.description;
+		if (record) {
+			projectId = record.projectId;
+			location = record.location;
+			office = record.office;
+			hasFlyback = record.hasFlyback;
+			description = record.description;
+		} else if (defaultProject && defaultProject.every_day) {
+			// 如果是新表单且有默认项目
+			projectId = defaultProject.every_day.project_id?.toString() || '';
+			location = defaultProject.every_day.site_name || '';
+			
+			// 尝试从 projaddress 获取选中的 office，或者 fallback 到 site_name
+			const selectedAddr = defaultProject.projaddress?.find((a: any) => a.selected_flag === 'Y');
+			office = selectedAddr ? selectedAddr.address_name : (defaultProject.every_day.site_name || '');
+			
+			hasFlyback = false;
+			description = '';
 		} else {
-			// 重置表单，保留一些默认值
+			// 重置
 			projectId = '';
-			location = '中国大陆';
+			location = '';
 			office = '';
 			hasFlyback = false;
 			description = '';
 		}
 	});
 
+	// Mock options + Dynamic options from defaultProject
+	// TODO: Load full lists from API
+	let projectOptions = $derived.by(() => {
+		const opts = [
+			{ value: 'p1', label: '汉得内部项目-AIGC-产品研发中心-研发项目-2024' },
+			{ value: 'p2', label: '汉得内部项目-亿砹科技-产品研发中心-HTMS运输管理研发项目-2025' },
+			{ value: 'p3', label: '上海电氢智运机-2025' },
+		];
+		if (defaultProject && defaultProject.every_day && defaultProject.every_day.project_id) {
+			const exists = opts.find(o => o.value === defaultProject!.every_day.project_id.toString());
+			if (!exists) {
+				opts.push({ 
+					value: defaultProject.every_day.project_id.toString(), 
+					label: defaultProject.every_day.project_name 
+				});
+			}
+		}
+		return opts;
+	});
+	
+	let officeOptions = $derived.by(() => {
+		const opts = [
+			{ value: '上海办公室', label: '上海办公室' },
+			{ value: '长沙交付中心(长沙市)', label: '长沙交付中心(长沙市)' },
+		];
+		// Add options from projaddress if available
+		if (defaultProject && defaultProject.projaddress) {
+			defaultProject.projaddress.forEach((addr: any) => {
+				if (!opts.find(o => o.value === addr.address_name)) {
+					opts.push({ value: addr.address_name, label: addr.address_name });
+				}
+			});
+		}
+		return opts;
+	});
+
 	// 衍生状态：审批人
-	const approver = $derived(PROJECTS.find(p => p.id === projectId)?.approver || '');
+	const approver = $derived(
+		defaultProject?.every_day?.approver || '未知'
+	);
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
-		onSave({
+		onSubmit({
 			date,
 			projectId,
 			location,
@@ -63,82 +115,98 @@
 	<form onsubmit={handleSubmit} class="space-y-5">
 		<!-- 项目 -->
 		<div>
+			<label for="project" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+				项目
+			</label>
 			<Select
-				label="项目"
-				bind:value={projectId}
-				options={PROJECTS.map(p => ({ value: p.id, label: p.name }))}
-				required
+				value={projectId}
+				onChange={(val) => projectId = val as string}
+				options={projectOptions}
 				placeholder="请选择项目"
 			/>
 		</div>
 
+		<!-- 地点 -->
 		<div class="grid grid-cols-2 gap-4">
-			<!-- 审批人 (只读) -->
 			<div>
-				<label for="approver" class="block text-sm font-medium text-slate-700 dark:text-slate-400 mb-1.5">审批人</label>
+				<label for="location" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+					地点
+				</label>
 				<input
 					type="text"
-					id="approver"
-					value={approver}
-					readonly
-					class="w-full rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed outline-none"
-					placeholder="自动带出"
+					id="location"
+					bind:value={location}
+					class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-slate-800 dark:text-slate-200 placeholder-slate-400"
+					placeholder="输入地点"
 				/>
 			</div>
-
-			<!-- Flyback -->
 			<div>
+				<label for="office" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+					办公地点
+				</label>
 				<Select
-					label="Flyback"
-					bind:value={hasFlyback}
-					options={[
-						{ value: false, label: '无 Flyback' },
-						{ value: true, label: '有 Flyback' }
-					]}
+					value={office}
+					onChange={(val) => office = val as string}
+					options={officeOptions}
+					placeholder="选择办公地点"
 				/>
 			</div>
 		</div>
 
-		<!-- 地点 -->
+		<!-- 审批人 (只读) -->
 		<div>
-			<label for="location" class="block text-sm font-medium text-slate-700 dark:text-slate-400 mb-1.5">地点</label>
-			<input
-				type="text"
-				id="location"
-				bind:value={location}
-				required
-				class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition"
-			/>
+			<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+				审批人
+			</label>
+			<div class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+				{approver}
+			</div>
 		</div>
 
-		<!-- 办公地点 -->
-		<div>
-			<Select
-				label="办公地点"
-				bind:value={office}
-				options={OFFICES.map(o => ({ value: o, label: o }))}
-				required
-				placeholder="请选择办公地点"
+		<!-- Flyback -->
+		<div class="flex items-center space-x-3">
+			<input
+				type="checkbox"
+				id="flyback"
+				bind:checked={hasFlyback}
+				class="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
 			/>
+			<label for="flyback" class="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">
+				Flyback
+			</label>
 		</div>
 
 		<!-- 描述 -->
 		<div>
-			<label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-400 mb-1.5">描述</label>
+			<label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+				工作描述
+			</label>
 			<textarea
 				id="description"
 				bind:value={description}
 				rows="3"
-				class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition resize-none"
-				placeholder="请输入打卡备注..."
+				class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-slate-800 dark:text-slate-200 placeholder-slate-400 resize-none"
+				placeholder="输入工作内容..."
 			></textarea>
 		</div>
 
-		<button
-			type="submit"
-			class="w-full py-3 rounded-xl bg-linear-to-r from-cyan-600 to-indigo-600 text-white font-semibold shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-		>
-			{initialData ? '更新打卡' : '提交打卡'}
-		</button>
+		<!-- Actions -->
+		<div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+			{#if onBack}
+				<button
+					type="button"
+					onclick={onBack}
+					class="px-6 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors"
+				>
+					返回
+				</button>
+			{/if}
+			<button
+				type="submit"
+				class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+			>
+				提交打卡
+			</button>
+		</div>
 	</form>
 </div>

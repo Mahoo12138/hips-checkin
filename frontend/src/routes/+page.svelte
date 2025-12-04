@@ -2,15 +2,36 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Header from '$lib/components/Header.svelte';
+	import { getToken } from '$lib/api';
 
 	let skipNext = $state(false);
 	const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
 
-	onMount(() => {
-		const flag = typeof localStorage !== 'undefined' ? localStorage.getItem('skipWelcome') : null;
-		if (flag === '1' && !isTest) {
-			goto('/login');
+	onMount(async () => {
+		// 1. 检查 Token (自动登录)
+		try {
+			const token = await getToken();
+			if (token) {
+				goto('/home');
+				return;
+			}
+		} catch (e) {
+			console.warn('Token check failed:', e);
 		}
+
+		// 2. 如果没有 Token，根据需求直接跳入登录页
+		// 原有的 Welcome 页逻辑：检查 skipWelcome
+		// const flag = typeof localStorage !== 'undefined' ? localStorage.getItem('skipWelcome') : null;
+		// if (flag === '1' && !isTest) {
+		// 	goto('/login');
+		// }
+		
+		// 用户指示：没有 Token 则跳入登录页。这意味着 Welcome 页实际上被跳过了。
+		// 为了保留 Welcome 页作为"关于"或首次展示的可能性，我们可以保留 skipWelcome 逻辑，
+		// 但根据当前明确指示 "没有的则跳入登录页"，我们应该强制跳转。
+		
+		// 如果需要完全跳过 Welcome 页：
+		goto('/login');
 	});
 
 	function start() {
