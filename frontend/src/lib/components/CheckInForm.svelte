@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CheckInRecord, DefaultProjectResponse } from '$lib/types';
 	import Select from './Select.svelte';
+	import ProjectSelect from './ProjectSelect.svelte';
 
 	interface Props {
 		record?: CheckInRecord | null;
@@ -115,13 +116,10 @@
 	<form onsubmit={handleSubmit} class="space-y-5">
 		<!-- 项目 -->
 		<div>
-			<label for="project" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-				项目
-			</label>
-			<Select
+			<ProjectSelect
 				value={projectId}
-				onChange={(val) => projectId = val as string}
-				options={projectOptions}
+				onChange={(val) => projectId = val}
+				label="项目"
 				placeholder="请选择项目"
 			/>
 		</div>

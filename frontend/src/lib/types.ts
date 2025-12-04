@@ -68,3 +68,22 @@ export interface DefaultProjectResponse {
   }>;
   [key: string]: any;
 }
+
+export interface ProjectItem {
+  project_id: number;
+  project_name: string;
+  project_code: string;
+  selected_flag: string;
+  approver: string;
+  project_type_id: number;
+  project_type: string;
+  need_opp: string;
+  distance_flag: string;
+  prj_address_id: string | number;
+  prj_address_name: string;
+}
+
+export interface FetchProjectsResponse {
+  status: string;
+  project: ProjectItem[];
+}
