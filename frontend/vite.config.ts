@@ -8,6 +8,11 @@ export default defineConfig({
 	ssr: {
 		noExternal: ['jsencrypt']
 	},
+	server: {
+		fs: {
+			allow: ['wailsjs']
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
