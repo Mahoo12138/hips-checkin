@@ -21,13 +21,13 @@
 {#if isOpen}
 	<!-- Backdrop -->
 	<div 
-		class="fixed inset-0 z-[60] bg-slate-900/20 dark:bg-slate-950/40 backdrop-blur-sm transition-opacity"
+		class="fixed inset-0 z-[100] bg-slate-900/20 dark:bg-slate-950/40 backdrop-blur-sm transition-opacity"
 		onclick={onClose}
 		aria-hidden="true"
 	></div>
 
 	<!-- Modal Panel -->
-	<div class="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
+	<div class="fixed inset-0 z-[110] flex items-center justify-center p-4 pointer-events-none">
 		<div 
 			class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 pointer-events-auto transform transition-all animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
 			role="dialog"

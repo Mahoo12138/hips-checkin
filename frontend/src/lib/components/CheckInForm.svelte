@@ -103,7 +103,7 @@
 	}
 </script>
 
-<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-lg transition-colors duration-300">
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-lg transition-colors duration-300 relative z-20">
 	<div class="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
 		<h2 class="text-xl font-bold text-slate-800 dark:text-slate-200">
 			打卡详情

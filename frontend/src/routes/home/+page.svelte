@@ -205,7 +205,7 @@
 
 			<!-- Form Section -->
 			<div class="w-full lg:w-5/12 xl:w-1/3 {mobileView === 'calendar' ? 'hidden lg:block' : ''}">
-				<div class="sticky top-24">
+				<div class="sticky top-24 z-10">
 					<div class="lg:hidden mb-4">
 						<button 
 							onclick={() => handleViewChange('calendar')}

@@ -113,7 +113,7 @@
 	}
 </script>
 
-<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg select-none transition-colors duration-300">
+<div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg select-none transition-colors duration-300 relative z-0">
 	<div class="flex items-center justify-between mb-4 px-2">
 		<button
 			onclick={handlePrevMonth}
