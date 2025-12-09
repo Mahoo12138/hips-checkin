@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
+	import WindowControls from './WindowControls.svelte';
 
 	interface Props {
 		title?: string;
@@ -13,7 +14,7 @@
 	let { title = '打卡助手', user = null, showBack = false, onBack, onLogout, extra }: Props = $props();
 </script>
 
-<header class="sticky top-0 z-50 w-full border-b bg-transparent border-slate-200 dark:border-slate-800 transition-colors duration-300">
+<header class="sticky top-0 z-50 w-full border-b bg-transparent border-slate-200 dark:border-slate-800 transition-colors duration-300" style="--wails-draggable:drag">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			{#if showBack && onBack}
@@ -30,12 +31,13 @@
 			</h1>
 		</div>
 
-		<div class="flex items-center gap-2 sm:gap-4">
+		<div class="flex items-center gap-2 sm:gap-4" style="--wails-draggable:no-drag">
 			{#if extra}
 				{@render extra()}
 			{/if}
 
 			<ThemeToggle />
+			<WindowControls />
 			
 			{#if user}
 				<span class="hidden sm:block text-sm text-slate-600 dark:text-slate-400 font-medium">
