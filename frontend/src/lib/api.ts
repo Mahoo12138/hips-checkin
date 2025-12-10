@@ -1,7 +1,7 @@
 import { api } from './utils/request';
 import { encryptPassword, getDeviceID } from './utils/crypto';
 import { SaveToken, GetToken, DeleteToken } from '$lib/../../wailsjs/go/main/App';
-import type { UserInfo, ProjectInfo, CalendarResponse, DefaultProjectResponse, FetchProjectsResponse } from './types';
+import type { UserInfo, ProjectInfo, CalendarResponse, DefaultProjectResponse, FetchProjectsResponse, ProjectAddressResponse } from './types';
 
 // Safe wrappers for Wails calls to support browser dev
 const safeSaveToken = async (token: string) => {
@@ -225,5 +225,25 @@ export async function fetchCalendar(employeeNum: string, month: string): Promise
 		p_month: month,
 		p_offset: 0,
 		p_language: "zh_CN"
+	});
+}
+
+
+/**
+ * 获取项目地址
+ */
+export async function fetchProjectAddress(projectId: number, dateStr?: string): Promise<ProjectAddressResponse> {
+	if (!dateStr) {
+		const now = new Date();
+		dateStr = now.getFullYear() + 
+			(now.getMonth() + 1).toString().padStart(2, '0') + 
+			now.getDate().toString().padStart(2, '0');
+	}
+
+	return invokeHandMobileApi<ProjectAddressResponse>('prj_addresses', {
+		p_project_id: projectId,
+		p_date: dateStr,
+		p_page: 1,
+		p_page_size: 10
 	});
 }

@@ -7,13 +7,14 @@
 
 	interface Props {
 		value: string; // project_id
+		initialProjectName?: string; // Add initial name prop
 		onChange: (val: string, project?: ProjectItem) => void;
 		placeholder?: string;
 		label?: string;
 		disabled?: boolean;
 	}
 
-	let { value = $bindable(), onChange, placeholder = '请选择项目', label, disabled = false }: Props = $props();
+	let { value = $bindable(), initialProjectName = '', onChange, placeholder = '请选择项目', label, disabled = false }: Props = $props();
 
 	let isModalOpen = $state(false);
 	let isLoading = $state(false);
@@ -34,6 +35,7 @@
 	// Derived state
 	let selectedLabel = $derived(
 		projects.find(p => p.project_id.toString() === value)?.project_name || 
+		initialProjectName || // Use initial name if available
 		value || // Fallback to showing ID if name not found yet
 		''
 	);

@@ -59,6 +59,7 @@ export interface DefaultProjectResponse {
     site_name: string;
     prj_address_id: number; // This seems to be the location ID
     address_id: number;
+    approver?: string;
     [key: string]: any;
   };
   projaddress: Array<{
@@ -86,4 +87,22 @@ export interface ProjectItem {
 export interface FetchProjectsResponse {
   status: string;
   project: ProjectItem[];
+}
+
+export interface ProjectAddress {
+  address_id: number;
+  site_name: string;
+  site_address: string;
+  prj_flag: string;
+  longitude: string;
+  dimension: string;
+  project_id: number;
+  project_name: string;
+}
+
+export interface ProjectAddressResponse {
+  status: string;
+  result: string;
+  address_list: ProjectAddress[];
+  count: number;
 }

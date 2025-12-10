@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { CheckInRecord, DefaultProjectResponse } from '$lib/types';
+	import type { CheckInRecord, DefaultProjectResponse, ProjectItem } from '$lib/types';
 	import Select from './Select.svelte';
 	import ProjectSelect from './ProjectSelect.svelte';
+	import { fetchProjectAddress } from '$lib/api';
 
 	interface Props {
 		record?: CheckInRecord | null;
@@ -17,8 +18,14 @@
 	let projectId = $state('');
 	let location = $state('');
 	let office = $state('');
-	let hasFlyback = $state(false);
+	let hasFlyback = $state('');
 	let description = $state('');
+	let approver = $state('');
+	
+	// Options state
+	let locationOptions = $state<{ value: string; label: string }[]>([]); // This is now for "Location" (projaddress)
+	let officeOptions = $state<{ value: string; label: string }[]>([]); // This is now for "Office Location" (fetchProjectAddress)
+	let flybackOptions = $state<{ value: string; label: string }[]>([]);
 	
 	// 监听 record 或 defaultProject 变化，更新表单
 	$effect(() => {
@@ -26,78 +33,151 @@
 			projectId = record.projectId;
 			location = record.location;
 			office = record.office;
-			hasFlyback = record.hasFlyback;
+			hasFlyback = record.hasFlyback ? 'Y' : 'N';
 			description = record.description;
+			// TODO: How to get approver for record?
 		} else if (defaultProject && defaultProject.every_day) {
 			// 如果是新表单且有默认项目
 			projectId = defaultProject.every_day.project_id?.toString() || '';
-			location = defaultProject.every_day.site_name || '';
+			approver = defaultProject.every_day.approver || '未知';
 			
-			// 尝试从 projaddress 获取选中的 office，或者 fallback 到 site_name
-			const selectedAddr = defaultProject.projaddress?.find((a: any) => a.selected_flag === 'Y');
-			office = selectedAddr ? selectedAddr.address_name : (defaultProject.every_day.site_name || '');
+			// Load default locations and flybacks
+			if (projectId) {
+				handleProjectChange(projectId, undefined, true);
+			}
 			
-			hasFlyback = false;
 			description = '';
 		} else {
 			// 重置
 			projectId = '';
 			location = '';
 			office = '';
-			hasFlyback = false;
+			hasFlyback = '';
 			description = '';
+			approver = '';
+			locationOptions = [];
+			officeOptions = [];
+			flybackOptions = [];
 		}
 	});
 
-	// Mock options + Dynamic options from defaultProject
-	// TODO: Load full lists from API
-	let projectOptions = $derived.by(() => {
-		const opts = [
-			{ value: 'p1', label: '汉得内部项目-AIGC-产品研发中心-研发项目-2024' },
-			{ value: 'p2', label: '汉得内部项目-亿砹科技-产品研发中心-HTMS运输管理研发项目-2025' },
-			{ value: 'p3', label: '上海电氢智运机-2025' },
-		];
-		if (defaultProject && defaultProject.every_day && defaultProject.every_day.project_id) {
-			const exists = opts.find(o => o.value === defaultProject!.every_day.project_id.toString());
-			if (!exists) {
-				opts.push({ 
-					value: defaultProject.every_day.project_id.toString(), 
-					label: defaultProject.every_day.project_name 
-				});
-			}
+	async function handleProjectChange(newProjectId: string, projectItem?: ProjectItem, isInit = false) {
+		projectId = newProjectId;
+		
+		if (!newProjectId) {
+			location = '';
+			office = '';
+			hasFlyback = '';
+			approver = '';
+			locationOptions = [];
+			officeOptions = [];
+			flybackOptions = [];
+			return;
 		}
-		return opts;
-	});
-	
-	let officeOptions = $derived.by(() => {
-		const opts = [
-			{ value: '上海办公室', label: '上海办公室' },
-			{ value: '长沙交付中心(长沙市)', label: '长沙交付中心(长沙市)' },
-		];
-		// Add options from projaddress if available
-		if (defaultProject && defaultProject.projaddress) {
-			defaultProject.projaddress.forEach((addr: any) => {
-				if (!opts.find(o => o.value === addr.address_name)) {
-					opts.push({ value: addr.address_name, label: addr.address_name });
+
+		// Update approver if projectItem provided
+		if (projectItem) {
+			approver = projectItem.approver;
+		}
+
+		try {
+			// 1. Set Location Options (Project Address from defaultProject/logic)
+			// According to requirement: Location comes from defaultProject.projaddress
+			// If we are switching projects, we might not have the projaddress list for the NEW project unless we fetch defaultProject again or fetchProjects includes it?
+			// Wait, fetchProjects returns ProjectItem which doesn't have projaddress list.
+			// The only place we have projaddress list is in defaultProject response.
+			// If the user selects a DIFFERENT project than default, we don't have its projaddress list readily available in client unless we fetch defaultProject for that specific project (which API supports? p_project_id?)
+			// The fetchDefaultProject API takes p_employee, not project_id.
+			// However, the requirement says "from project interface return projaddress array".
+			// If the user selects a project from the Modal (fetchProjects), we only get ProjectItem.
+			// Let's assume for now we use the projaddress from defaultProject if the IDs match, otherwise we might need another API call or fallback.
+			// BUT, the instruction says "Location changed to Project Location, from project interface ... projaddress array".
+			// If "project interface" refers to `fetch_projects`, let's check its response structure.
+			// `fetch_projects` response (ProjectItem) has `prj_address_id` and `prj_address_name` but not a list.
+			// `fetch_default_project` response has `projaddress` array.
+			
+			// Assuming we only have the full address list for the default project. 
+			// If switching to a non-default project, we might only have single address from ProjectItem.
+			
+			if (defaultProject && defaultProject.every_day.project_id.toString() === newProjectId) {
+				if (defaultProject.projaddress) {
+					locationOptions = defaultProject.projaddress.map(addr => ({
+						value: addr.address_name,
+						label: addr.address_name
+					}));
+					// Default selected
+					if (!isInit || !location) {
+						const def = defaultProject.projaddress.find(a => a.selected_flag === 'Y');
+						location = def ? def.address_name : (locationOptions[0]?.value || '');
+					}
 				}
-			});
-		}
-		return opts;
-	});
+			} else if (projectItem) {
+				// Fallback for non-default project: use the address from projectItem
+				if (projectItem.prj_address_name) {
+					locationOptions = [{
+						value: projectItem.prj_address_name,
+						label: projectItem.prj_address_name
+					}];
+					location = projectItem.prj_address_name;
+				} else {
+					locationOptions = [];
+					location = '';
+				}
+			}
 
-	// 衍生状态：审批人
-	const approver = $derived(
-		defaultProject?.every_day?.approver || '未知'
-	);
+			// 2. Fetch Office Address (using fetchProjectAddress)
+			// This was previously "Location", now "Office Location"
+			const res = await fetchProjectAddress(parseInt(newProjectId));
+			if (res && res.address_list) {
+				officeOptions = res.address_list.map(addr => ({
+					value: addr.site_name,
+					label: addr.site_name
+				}));
+
+				// Set default office (prj_flag === 'Y')
+				if (!isInit || !office) {
+					const defaultAddr = res.address_list.find(addr => addr.prj_flag === 'Y');
+					office = defaultAddr ? defaultAddr.site_name : (res.address_list[0]?.site_name || '');
+				}
+			} else {
+				officeOptions = [];
+				office = '';
+			}
+
+			// 3. Set Flyback options
+			if (defaultProject && defaultProject.every_day.project_id.toString() === newProjectId) {
+				const flys = (defaultProject as any).flyback || [];
+				flybackOptions = flys.map((f: any) => ({
+					value: f.fly_id.toString(),
+					label: f.fly_name
+				}));
+				
+				if (!isInit || !hasFlyback) {
+					const defFly = flys.find((f: any) => f.fly_select === 'Y');
+					hasFlyback = defFly ? defFly.fly_id.toString() : '';
+				}
+			} else {
+				// Fallback options
+				flybackOptions = [
+					{ value: '-1', label: '无flyback' },
+					{ value: '0', label: '有flyback' }
+				];
+				hasFlyback = '-1';
+			}
+
+		} catch (e) {
+			console.error('Failed to load project details', e);
+		}
+	}
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 		onSubmit({
 			date,
 			projectId,
-			location,
-			office,
-			hasFlyback,
+			location, // This is Project Address
+			office,   // This is Office Address
+			hasFlyback: hasFlyback !== '-1', 
 			description
 		});
 	}
@@ -118,7 +198,8 @@
 		<div>
 			<ProjectSelect
 				value={projectId}
-				onChange={(val) => projectId = val}
+				initialProjectName={defaultProject?.every_day?.project_name}
+				onChange={(val, item) => handleProjectChange(val, item)}
 				label="项目"
 				placeholder="请选择项目"
 			/>
@@ -130,12 +211,11 @@
 				<label for="location" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
 					地点
 				</label>
-				<input
-					type="text"
-					id="location"
-					bind:value={location}
-					class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-slate-800 dark:text-slate-200 placeholder-slate-400"
-					placeholder="输入地点"
+				<Select
+					value={location}
+					onChange={(val) => location = val as string}
+					options={locationOptions}
+					placeholder="选择地点"
 				/>
 			</div>
 			<div>
@@ -162,16 +242,16 @@
 		</div>
 
 		<!-- Flyback -->
-		<div class="flex items-center space-x-3">
-			<input
-				type="checkbox"
-				id="flyback"
-				bind:checked={hasFlyback}
-				class="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
-			/>
-			<label for="flyback" class="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">
+		<div>
+			<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
 				Flyback
 			</label>
+			<Select
+				value={hasFlyback}
+				onChange={(val) => hasFlyback = val as string}
+				options={flybackOptions}
+				placeholder="选择 Flyback"
+			/>
 		</div>
 
 		<!-- 描述 -->
