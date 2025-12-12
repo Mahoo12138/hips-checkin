@@ -67,6 +67,11 @@ export interface DefaultProjectResponse {
     address_id: number;
     selected_flag: string;
   }>;
+  flyback?: Array<{
+    fly_name: string;
+    fly_id: number;
+    fly_select: string;
+  }>;
   [key: string]: any;
 }
 

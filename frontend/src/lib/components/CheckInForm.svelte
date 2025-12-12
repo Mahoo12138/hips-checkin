@@ -146,14 +146,14 @@
 
 			// 3. Set Flyback options
 			if (defaultProject && defaultProject.every_day.project_id.toString() === newProjectId) {
-				const flys = (defaultProject as any).flyback || [];
-				flybackOptions = flys.map((f: any) => ({
+				const flys = defaultProject.flyback || [];
+				flybackOptions = flys.map(f => ({
 					value: f.fly_id.toString(),
 					label: f.fly_name
 				}));
 				
 				if (!isInit || !hasFlyback) {
-					const defFly = flys.find((f: any) => f.fly_select === 'Y');
+					const defFly = flys.find(f => f.fly_select === 'Y');
 					hasFlyback = defFly ? defFly.fly_id.toString() : '';
 				}
 			} else {
