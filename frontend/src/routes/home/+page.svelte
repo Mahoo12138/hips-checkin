@@ -185,10 +185,21 @@
 	}
 </script>
 
+{#snippet headerExtra()}
+	<button
+		onclick={() => goto('/map')}
+		class="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-400 dark:hover:text-indigo-400 dark:hover:bg-slate-800 transition-all"
+		title="位置管理"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+	</button>
+{/snippet}
+
 <div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
 	<Header 
 		user={{ name: user?.name || 'User' }} 
 		onLogout={logout}
+		extra={headerExtra}
 	/>
 
 	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -216,6 +227,62 @@
 							</svg>
 							返回日历
 						</button>
+					</div>
+
+					<!-- Location Selection Card -->
+					<div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700/60 mb-6 transition-all duration-300">
+						<div class="flex items-center justify-between mb-4">
+							<h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+								模拟位置
+							</h2>
+							<button 
+								onclick={() => goto('/map')} 
+								class="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-2 py-1 rounded transition-colors"
+							>
+								管理
+							</button>
+						</div>
+						
+						{#if savedLocations.length === 0}
+							<div class="text-center py-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+								<p class="text-sm text-slate-500 dark:text-slate-400 mb-2">暂无模拟位置</p>
+								<button 
+									onclick={() => goto('/map')}
+									class="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+								>
+									去添加位置
+								</button>
+							</div>
+						{:else}
+							<div class="grid gap-3">
+								{#each savedLocations as loc}
+									<button 
+										class="w-full text-left p-3 rounded-xl border transition-all duration-200 group relative overflow-hidden
+										{currentSimLocationId === loc.id 
+											? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20 ring-1 ring-indigo-500/20' 
+											: 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-slate-50 dark:hover:bg-slate-800'}"
+										onclick={() => currentSimLocationId = loc.id}
+									>
+										<div class="flex items-start justify-between">
+											<div class="flex-1 min-w-0 mr-2">
+												<div class="font-medium text-sm text-slate-900 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+													{loc.name}
+												</div>
+												<div class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+													{loc.address}
+												</div>
+											</div>
+											{#if currentSimLocationId === loc.id}
+												<div class="flex-shrink-0 text-indigo-500">
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+												</div>
+											{/if}
+										</div>
+									</button>
+								{/each}
+							</div>
+						{/if}
 					</div>
 					
 					<CheckInForm 
