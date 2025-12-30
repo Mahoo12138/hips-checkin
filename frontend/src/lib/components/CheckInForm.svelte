@@ -205,52 +205,52 @@
 		</div>
 
 		<!-- 地点 -->
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<label for="location" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-					地点
-				</label>
-				<Select
-					value={locationId}
-					onChange={(val) => locationId = val as string}
-					options={locationOptions}
-					placeholder="选择地点"
-				/>
-			</div>
-			<div>
-				<label for="office" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-					办公地点
-				</label>
-				<Select
-					value={officeId}
-					onChange={(val) => officeId = val as string}
-					options={officeOptions}
-					placeholder="选择办公地点"
-				/>
-			</div>
-		</div>
-
-		<!-- 审批人 (只读) -->
 		<div>
-			<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-				审批人
-			</label>
-			<div class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
-				{approver}
-			</div>
-		</div>
-
-		<!-- Flyback -->
-		<div>
-			<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-				Flyback
+			<label for="location" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+				地点
 			</label>
 			<Select
-				value={flybackId}
-				onChange={(val) => flybackId = val as string}
-				options={flybackOptions}
-				placeholder="选择 Flyback"
+				value={locationId}
+				onChange={(val) => locationId = val as string}
+				options={locationOptions}
+				placeholder="选择地点"
 			/>
+		</div>
+
+		<!-- 办公地点 -->
+		<div>
+			<label for="office" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+				办公地点
+			</label>
+			<Select
+				value={officeId}
+				onChange={(val) => officeId = val as string}
+				options={officeOptions}
+				placeholder="选择办公地点"
+			/>
+		</div>
+
+		<!-- 审批人和 Flyback (并排) -->
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+					审批人
+				</label>
+				<div class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+					{approver || '未知'}
+				</div>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+					Flyback
+				</label>
+				<Select
+					value={flybackId}
+					onChange={(val) => flybackId = val as string}
+					options={flybackOptions}
+					placeholder="选择 Flyback"
+				/>
+			</div>
 		</div>
 
 		<!-- 描述 -->

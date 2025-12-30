@@ -7,9 +7,10 @@
 		timeSheetData: Record<string, TimeSheetRecord>; // Key: YYYY-MM-DD
 		currentMonthStr: string; // YYYYMM 用于初始化日历月份
 		onSelect: (date: string, record: TimeSheetRecord | null) => void;
+		onMonthChange?: (year: number, month: number) => void;
 	}
 
-	let { selectedDate, timeSheetData, currentMonthStr, onSelect }: Props = $props();
+	let { selectedDate, timeSheetData, currentMonthStr, onSelect, onMonthChange }: Props = $props();
 
 	// 解析传入的月份字符串 YYYYMM
 	const initialYear = parseInt(currentMonthStr.slice(0, 4));
@@ -66,6 +67,7 @@
 		} else {
 			currentMonth--;
 		}
+		onMonthChange?.(currentYear, currentMonth);
 	}
 
 	function handleNextMonth() {
@@ -75,6 +77,7 @@
 		} else {
 			currentMonth++;
 		}
+		onMonthChange?.(currentYear, currentMonth);
 	}
 
 	function isToday(day: number): boolean {

@@ -213,6 +213,19 @@
 	function handleViewChange(view: 'calendar' | 'form') {
 		mobileView = view;
 	}
+
+	async function handleMonthChange(year: number, month: number) {
+		const m = String(month + 1).padStart(2, '0');
+		const monthStr = `${year}${m}`;
+		currentMonthStr = monthStr;
+		
+		try {
+			const calendarData = await fetchCalendar(employeeNum, monthStr);
+			loadCalendarData(calendarData.timesheet);
+		} catch (e) {
+			console.error('Failed to fetch calendar for month:', monthStr, e);
+		}
+	}
 </script>
 
 {#snippet headerExtra()}
@@ -241,6 +254,7 @@
 					{selectedDate} 
 					{currentMonthStr}
 					onSelect={handleDateSelect} 
+					onMonthChange={handleMonthChange}
 				/>
 			</div>
 
