@@ -5,13 +5,14 @@
 	import CheckInForm from '$lib/components/CheckInForm.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Select from '$lib/components/Select.svelte';
-	import type { CheckInRecord, TimeSheetRecord, DefaultProjectResponse } from '$lib/types';
+	import type { CheckInRecord, TimeSheetRecord, DefaultProjectResponse, CheckInSubmitData } from '$lib/types';
 	import { MOCK_TIMESHEET_DATA } from '$lib/mock';
 	import Header from '$lib/components/Header.svelte';
-	import { logout as apiLogout, fetchUserInfo, fetchUserDetail, fetchDefaultProject, fetchCalendar } from '$lib/api';
+	import { logout as apiLogout, fetchUserInfo, fetchUserDetail, fetchDefaultProject, fetchCalendar, saveTimeSheet } from '$lib/api';
 	import { userStore } from '$lib/stores';
 
 	let user = $state<{ name: string } | null>(null);
+	let employeeNum = $state('');
 	let timeSheetMap = $state<Record<string, TimeSheetRecord>>({});
 	let currentMonthStr = $state(new Date().toISOString().slice(0, 7).replace('-', '')); // YYYYMM
 	
@@ -54,6 +55,7 @@
 					userStore.set(detail);
 					currentUser = detail;
 					user = { name: detail.realName };
+					employeeNum = detail.employeeNum || '';
 				}
 			} catch (e) {
 				console.error('Failed to load user info', e);
@@ -62,6 +64,7 @@
 			}
 		} else {
 			user = { name: currentUser.realName };
+			employeeNum = currentUser.employeeNum || '';
 		}
 
 		if (!currentUser || !currentUser.employeeNum) {
@@ -72,7 +75,8 @@
 		// 2. 请求默认项目
 		try {
 			const proj = await fetchDefaultProject(currentUser.employeeNum);
-			if (proj) {
+			console.log('Fetched default project:', proj);
+			if (proj && proj.every_day) {
 				defaultProject = proj;
 			}
 		} catch (e) {
@@ -155,29 +159,55 @@
 		};
 	}
 
-	function handleFormSubmit(data: Omit<CheckInRecord, 'id' | 'submittedAt'>) {
+	async function handleFormSubmit(data: CheckInSubmitData) {
 		console.log('Submitting:', data);
-		// TODO: Implement submit API
 		
-		// Optimistic update
-		const newRecord: TimeSheetRecord = {
-			status: 'Submitted',
-			lockflag: '0',
-			each_day: data.date.replace(/-/g, ''),
-			enable: 'Y',
-			day: data.date.slice(8, 10),
-			proj: data.projectId, // This should be name, but we only have ID here. Ideally update from response.
-			allowance: '0'
-		};
-		
-		timeSheetMap = {
-			...timeSheetMap,
-			[data.date]: newRecord
-		};
-		
-		modalTitle = '成功';
-		modalMessage = '打卡提交成功';
-		isModalOpen = true;
+		try {
+			// Find simulated location if any
+			const simLoc = savedLocations.find(l => l.id === currentSimLocationId);
+			
+			const res = await saveTimeSheet({
+				employeeNum: employeeNum,
+				date: data.date,
+				projectId: data.projectId,
+				description: data.description,
+				addressId: data.locationId,
+				flybackId: data.flybackId,
+				addressDetail: data.officeName, // Use Office Name as Address Detail for now, or construct it
+				officeId: data.officeId,
+				longitude: simLoc?.lng?.toString(),
+				latitude: simLoc?.lat?.toString(),
+				// equipmentNumber: ??? // Optional, defaults to mock
+			});
+
+			if (res.status === 'S' || res.refresh_status === 'S') {
+				// Refresh calendar data from response
+				if (res.refresh_timesheet && res.refresh_timesheet.timesheet) {
+					loadCalendarData(res.refresh_timesheet.timesheet);
+				} else {
+					// Fallback if no timesheet in response, maybe fetch calendar again?
+					// Or just do optimistic update as before?
+					// Let's re-fetch calendar to be safe if response is missing data
+					try {
+						const calendarData = await fetchCalendar(employeeNum, currentMonthStr);
+						loadCalendarData(calendarData.timesheet);
+					} catch (e) {
+						console.warn('Failed to refresh calendar after submit', e);
+					}
+				}
+
+				modalTitle = '成功';
+				modalMessage = '打卡提交成功';
+				isModalOpen = true;
+			} else {
+				throw new Error(res.message || res.refresh_message || '提交失败');
+			}
+		} catch (e: any) {
+			console.error('Submit failed:', e);
+			modalTitle = '错误';
+			modalMessage = e.message || '提交失败，请重试';
+			isModalOpen = true;
+		}
 	}
 
 	function handleViewChange(view: 'calendar' | 'form') {
@@ -286,7 +316,7 @@
 					</div>
 					
 					<CheckInForm 
-						record={mapToFormRecord(selectedDate, timeSheetMap[selectedDate])}
+						record={null}
 						date={selectedDate}
 						defaultProject={defaultProject}
 						onSubmit={handleFormSubmit}

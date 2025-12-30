@@ -247,3 +247,55 @@ export async function fetchProjectAddress(projectId: number, dateStr?: string): 
 		p_page_size: 10
 	});
 }
+
+/**
+ * 保存 TimeSheet
+ */
+export interface SaveTimeSheetParams {
+	employeeNum: string;
+	date: string; // YYYY-MM-DD
+	projectId: string;
+	description: string;
+	addressId: string; // Project Address ID (p_address)
+	flybackId: string; // p_flyback
+	addressDetail: string; // p_address_detail
+	officeId: string; // Office ID (p_address_id)
+	longitude?: string;
+	latitude?: string;
+	equipmentNumber?: string;
+}
+
+export async function saveTimeSheet(params: SaveTimeSheetParams): Promise<any> {
+	const dateStr = params.date.replace(/-/g, '');
+	
+	const req = {
+		p_employee: params.employeeNum,
+		p_date: dateStr,
+		p_project: params.projectId,
+		p_description: params.description,
+		p_offbase_flag: "0",
+		p_base_flag: "0",
+		p_ext_charge: "1",
+		p_int_charge: "1",
+		p_address: params.addressId || "0", // Project Address ID
+		p_flyback: params.flybackId || "-1",
+		p_address_detail: params.addressDetail,
+		p_province: "", // TODO: Parse from address detail if needed
+		p_city: "",
+		p_country: "中国",
+		p_equipment_number: params.equipmentNumber || "5623c89caa393bbe",
+		p_operating_system: "Android",
+		p_brand: "Xiaomi", // Mock
+		p_system_model: "14", // Mock
+		p_longitude: params.longitude || "112.85936409179686",
+		p_latitude: params.latitude || "28.23876419726563",
+		p_sale_id: "",
+		p_language: "zh_CN",
+		p_opportunity_id: "",
+		p_address_id: params.officeId || "77801", // Office ID
+		p_distance_code: "",
+		p_replenish: "N"
+	};
+
+	return invokeHandMobileApi<any>('save_timesheet1', req);
+}

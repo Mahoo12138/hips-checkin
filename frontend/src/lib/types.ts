@@ -47,6 +47,18 @@ export interface CheckInRecord {
   status?: 'draft' | 'submitted';
 }
 
+export interface CheckInSubmitData {
+  date: string;
+  projectId: string;
+  locationId: string;
+  locationName: string;
+  officeId: string;
+  officeName: string;
+  flybackId: string;
+  description: string;
+  approver: string;
+}
+
 export interface DefaultProjectResponse {
   status: string;
   project: string;

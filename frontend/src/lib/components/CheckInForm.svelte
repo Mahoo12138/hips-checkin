@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CheckInRecord, DefaultProjectResponse, ProjectItem } from '$lib/types';
+	import type { CheckInRecord, DefaultProjectResponse, ProjectItem, CheckInSubmitData } from '$lib/types';
 	import Select from './Select.svelte';
 	import ProjectSelect from './ProjectSelect.svelte';
 	import { fetchProjectAddress } from '$lib/api';
@@ -8,51 +8,58 @@
 		record?: CheckInRecord | null;
 		date: string;
 		defaultProject?: DefaultProjectResponse | null;
-		onSubmit: (data: Omit<CheckInRecord, 'id' | 'submittedAt'>) => void;
+		onSubmit: (data: CheckInSubmitData) => void;
 		onBack?: () => void;
 	}
 
 	let { record = null, date, defaultProject = null, onSubmit, onBack }: Props = $props();
 
 	// Form state
-	let projectId = $state('');
-	let location = $state('');
-	let office = $state('');
-	let hasFlyback = $state('');
+	let projectId = $state(record?.projectId || defaultProject?.every_day?.project_id?.toString() || '');
+	let locationId = $state('');
+	let officeId = $state('');
+	let flybackId = $state('');
 	let description = $state('');
 	let approver = $state('');
 	
 	// Options state
-	let locationOptions = $state<{ value: string; label: string }[]>([]); // This is now for "Location" (projaddress)
-	let officeOptions = $state<{ value: string; label: string }[]>([]); // This is now for "Office Location" (fetchProjectAddress)
+	let locationOptions = $state<{ value: string; label: string }[]>([]); 
+	let officeOptions = $state<{ value: string; label: string }[]>([]); 
 	let flybackOptions = $state<{ value: string; label: string }[]>([]);
 	
 	// 监听 record 或 defaultProject 变化，更新表单
 	$effect(() => {
+		console.log('CheckInForm effect triggered', { hasRecord: !!record, hasDefault: !!defaultProject, currentProjectId: projectId });
 		if (record) {
 			projectId = record.projectId;
-			location = record.location;
-			office = record.office;
-			hasFlyback = record.hasFlyback ? 'Y' : 'N';
+			// record currently has names, but we need IDs. 
+			// If we can't recover IDs, we might have issues editing. 
+			// For now, let's assume we are mostly creating or overwriting.
+			// locationId = ???
 			description = record.description;
-			// TODO: How to get approver for record?
 		} else if (defaultProject && defaultProject.every_day) {
 			// 如果是新表单且有默认项目
-			projectId = defaultProject.every_day.project_id?.toString() || '';
-			approver = defaultProject.every_day.approver || '未知';
-			
-			// Load default locations and flybacks
-			if (projectId) {
-				handleProjectChange(projectId, undefined, true);
+			const newProjId = defaultProject.every_day.project_id?.toString() || '';
+			// Only update if project changed or form is empty/reset
+			if (newProjId) {
+				// Initialize if empty OR if it matches default (to ensure options are loaded)
+				if (!projectId || projectId === newProjId) {
+					projectId = newProjId;
+					approver = defaultProject.every_day.approver || '未知';
+					
+					// Load default locations and flybacks
+					handleProjectChange(newProjId, undefined, true);
+					
+					// Only reset description if it was empty
+					if (!description) description = '';
+				}
 			}
-			
-			description = '';
 		} else {
 			// 重置
 			projectId = '';
-			location = '';
-			office = '';
-			hasFlyback = '';
+			locationId = '';
+			officeId = '';
+			flybackId = '';
 			description = '';
 			approver = '';
 			locationOptions = [];
@@ -65,9 +72,9 @@
 		projectId = newProjectId;
 		
 		if (!newProjectId) {
-			location = '';
-			office = '';
-			hasFlyback = '';
+			locationId = '';
+			officeId = '';
+			flybackId = '';
 			approver = '';
 			locationOptions = [];
 			officeOptions = [];
@@ -82,66 +89,51 @@
 
 		try {
 			// 1. Set Location Options (Project Address from defaultProject/logic)
-			// According to requirement: Location comes from defaultProject.projaddress
-			// If we are switching projects, we might not have the projaddress list for the NEW project unless we fetch defaultProject again or fetchProjects includes it?
-			// Wait, fetchProjects returns ProjectItem which doesn't have projaddress list.
-			// The only place we have projaddress list is in defaultProject response.
-			// If the user selects a DIFFERENT project than default, we don't have its projaddress list readily available in client unless we fetch defaultProject for that specific project (which API supports? p_project_id?)
-			// The fetchDefaultProject API takes p_employee, not project_id.
-			// However, the requirement says "from project interface return projaddress array".
-			// If the user selects a project from the Modal (fetchProjects), we only get ProjectItem.
-			// Let's assume for now we use the projaddress from defaultProject if the IDs match, otherwise we might need another API call or fallback.
-			// BUT, the instruction says "Location changed to Project Location, from project interface ... projaddress array".
-			// If "project interface" refers to `fetch_projects`, let's check its response structure.
-			// `fetch_projects` response (ProjectItem) has `prj_address_id` and `prj_address_name` but not a list.
-			// `fetch_default_project` response has `projaddress` array.
-			
-			// Assuming we only have the full address list for the default project. 
-			// If switching to a non-default project, we might only have single address from ProjectItem.
-			
 			if (defaultProject && defaultProject.every_day.project_id.toString() === newProjectId) {
 				if (defaultProject.projaddress) {
 					locationOptions = defaultProject.projaddress.map(addr => ({
-						value: addr.address_name,
+						value: addr.address_id.toString(),
 						label: addr.address_name
 					}));
 					// Default selected
-					if (!isInit || !location) {
+					if (!isInit || !locationId) {
 						const def = defaultProject.projaddress.find(a => a.selected_flag === 'Y');
-						location = def ? def.address_name : (locationOptions[0]?.value || '');
+						locationId = def ? def.address_id.toString() : (locationOptions[0]?.value || '');
 					}
 				}
 			} else if (projectItem) {
-				// Fallback for non-default project: use the address from projectItem
+				// Fallback for non-default project
+				// projectItem doesn't have ID for address? 
+				// fetch_projects response has prj_address_id and prj_address_name
 				if (projectItem.prj_address_name) {
+					const pid = projectItem.prj_address_id ? projectItem.prj_address_id.toString() : '0';
 					locationOptions = [{
-						value: projectItem.prj_address_name,
+						value: pid,
 						label: projectItem.prj_address_name
 					}];
-					location = projectItem.prj_address_name;
+					locationId = pid;
 				} else {
 					locationOptions = [];
-					location = '';
+					locationId = '';
 				}
 			}
 
 			// 2. Fetch Office Address (using fetchProjectAddress)
-			// This was previously "Location", now "Office Location"
 			const res = await fetchProjectAddress(parseInt(newProjectId));
 			if (res && res.address_list) {
 				officeOptions = res.address_list.map(addr => ({
-					value: addr.site_name,
+					value: addr.address_id.toString(),
 					label: addr.site_name
 				}));
 
 				// Set default office (prj_flag === 'Y')
-				if (!isInit || !office) {
+				if (!isInit || !officeId) {
 					const defaultAddr = res.address_list.find(addr => addr.prj_flag === 'Y');
-					office = defaultAddr ? defaultAddr.site_name : (res.address_list[0]?.site_name || '');
+					officeId = defaultAddr ? defaultAddr.address_id.toString() : (res.address_list[0]?.value?.toString() || (res.address_list[0] as any).address_id.toString() || '');
 				}
 			} else {
 				officeOptions = [];
-				office = '';
+				officeId = '';
 			}
 
 			// 3. Set Flyback options
@@ -152,9 +144,9 @@
 					label: f.fly_name
 				}));
 				
-				if (!isInit || !hasFlyback) {
+				if (!isInit || !flybackId) {
 					const defFly = flys.find(f => f.fly_select === 'Y');
-					hasFlyback = defFly ? defFly.fly_id.toString() : '';
+					flybackId = defFly ? defFly.fly_id.toString() : '';
 				}
 			} else {
 				// Fallback options
@@ -162,7 +154,7 @@
 					{ value: '-1', label: '无flyback' },
 					{ value: '0', label: '有flyback' }
 				];
-				hasFlyback = '-1';
+				flybackId = '-1';
 			}
 
 		} catch (e) {
@@ -172,13 +164,20 @@
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
+		
+		const locationName = locationOptions.find(o => o.value === locationId)?.label || '';
+		const officeName = officeOptions.find(o => o.value === officeId)?.label || '';
+
 		onSubmit({
 			date,
 			projectId,
-			location, // This is Project Address
-			office,   // This is Office Address
-			hasFlyback: hasFlyback !== '-1', 
-			description
+			locationId,
+			locationName,
+			officeId,
+			officeName,
+			flybackId, 
+			description,
+			approver
 		});
 	}
 </script>
@@ -212,8 +211,8 @@
 					地点
 				</label>
 				<Select
-					value={location}
-					onChange={(val) => location = val as string}
+					value={locationId}
+					onChange={(val) => locationId = val as string}
 					options={locationOptions}
 					placeholder="选择地点"
 				/>
@@ -223,8 +222,8 @@
 					办公地点
 				</label>
 				<Select
-					value={office}
-					onChange={(val) => office = val as string}
+					value={officeId}
+					onChange={(val) => officeId = val as string}
 					options={officeOptions}
 					placeholder="选择办公地点"
 				/>
@@ -247,8 +246,8 @@
 				Flyback
 			</label>
 			<Select
-				value={hasFlyback}
-				onChange={(val) => hasFlyback = val as string}
+				value={flybackId}
+				onChange={(val) => flybackId = val as string}
 				options={flybackOptions}
 				placeholder="选择 Flyback"
 			/>
